@@ -2,7 +2,9 @@ import 'dart:async';
 import 'dart:io';
 
 import 'package:chat_app/core/services/auth/auth_service.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:firebase_auth/firebase_auth.dart';
+import 'package:firebase_storage/firebase_storage.dart';
 
 import '../../models/chat_user.dart';
 
@@ -40,8 +42,16 @@ class AuthFirebaseService implements AuthService {
 
     if (credential.user == null) return;
 
-    credential.user?.updateDisplayName(name);
-    // credential.user?.updatePhotoURL(photoURL);
+    // 1. Upload da foto do usuario
+    final imageName = '${credential.user!.uid}.jpg';
+    final imageURL = await _uploadUserImage(image, imageName);
+
+    // 2. Atualizar os atributos do usuario
+    await credential.user?.updateDisplayName(name);
+    await credential.user?.updatePhotoURL(imageURL);
+
+    // 3. salvar usuario no banco de dados (opcional)
+    await _saveChatUser(_toChatUser(credential.user!, imageURL));
   }
 
   Future<void> login(String email, String password) async {
@@ -55,12 +65,32 @@ class AuthFirebaseService implements AuthService {
     FirebaseAuth.instance.signOut();
   }
 
-  static ChatUser _toChatUser(User user) {
+  Future<String?> _uploadUserImage(File? image, String imageName) async {
+    if (image == null) return null;
+
+    final storage = FirebaseStorage.instance;
+    final imageRef = storage.ref().child('user_images').child(imageName);
+    await imageRef.putFile(image).whenComplete(() {});
+    return await imageRef.getDownloadURL();
+  }
+
+  Future<void> _saveChatUser(ChatUser user) async {
+    final store = FirebaseFirestore.instance;
+    final docRef = store.collection('users').doc(user.id);
+
+    return docRef.set({
+      'name': user.name,
+      'email': user.email,
+      'imageUrl': user.imageUrl,
+    });
+  }
+
+  static ChatUser _toChatUser(User user, [String? imageURL]) {
     return ChatUser(
       id: user.uid,
       name: user.displayName ?? user.email!.split('@')[0],
       email: user.email!,
-      imageUrl: user.photoURL ?? 'assets/images/avatar.png',
+      imageUrl: imageURL ?? user.photoURL ?? 'assets/images/avatar.png',
     );
   }
 }
