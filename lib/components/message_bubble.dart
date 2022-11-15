@@ -1,7 +1,8 @@
 import 'dart:io';
 
-import 'package:chat_app/core/models/chat_message.dart';
 import 'package:flutter/material.dart';
+
+import '../core/models/chat_message.dart';
 
 class MessageBubble extends StatelessWidget {
   static const _defaultImage = 'assets/images/avatar.png';
@@ -9,9 +10,9 @@ class MessageBubble extends StatelessWidget {
   final bool belongsToCurrentUser;
 
   const MessageBubble({
-    super.key,
     required this.message,
     required this.belongsToCurrentUser,
+    super.key,
   });
 
   Widget _showUserImage(String imageUrl) {
@@ -19,7 +20,7 @@ class MessageBubble extends StatelessWidget {
     final uri = Uri.parse(imageUrl);
 
     if (uri.path.contains(_defaultImage)) {
-      provider = AssetImage(_defaultImage);
+      provider = const AssetImage(_defaultImage);
     } else if (uri.scheme.contains('http')) {
       provider = NetworkImage(uri.toString());
     } else {
@@ -44,16 +45,16 @@ class MessageBubble extends StatelessWidget {
               decoration: BoxDecoration(
                 color: belongsToCurrentUser
                     ? Colors.grey.shade300
-                    : Theme.of(context).colorScheme.secondary,
+                    : Theme.of(context).primaryColor,
                 borderRadius: BorderRadius.only(
-                  topLeft: Radius.circular(12),
-                  topRight: Radius.circular(12),
+                  topLeft: const Radius.circular(12),
+                  topRight: const Radius.circular(12),
                   bottomLeft: belongsToCurrentUser
-                      ? Radius.circular(12)
-                      : Radius.circular(0),
+                      ? const Radius.circular(12)
+                      : const Radius.circular(0),
                   bottomRight: belongsToCurrentUser
-                      ? Radius.circular(0)
-                      : Radius.circular(12),
+                      ? const Radius.circular(0)
+                      : const Radius.circular(12),
                 ),
               ),
               width: 180,
@@ -61,10 +62,7 @@ class MessageBubble extends StatelessWidget {
                 vertical: 10,
                 horizontal: 16,
               ),
-              margin: const EdgeInsets.symmetric(
-                vertical: 15,
-                horizontal: 8,
-              ),
+              margin: const EdgeInsets.symmetric(vertical: 15, horizontal: 8),
               child: Column(
                 crossAxisAlignment: belongsToCurrentUser
                     ? CrossAxisAlignment.end

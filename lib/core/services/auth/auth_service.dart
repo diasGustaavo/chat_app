@@ -1,9 +1,7 @@
 import 'dart:io';
 
-import 'package:chat_app/core/services/auth/auth_firebase_service.dart';
-import 'package:chat_app/core/services/auth/auth_mock_service.dart';
-
 import '../../models/chat_user.dart';
+import 'auth_firebase_service.dart';
 
 abstract class AuthService {
   ChatUser? get currentUser;
@@ -11,7 +9,7 @@ abstract class AuthService {
   Stream<ChatUser?> get userChanges;
 
   Future<void> signup(
-    String nome,
+    String name,
     String email,
     String password,
     File? image,
